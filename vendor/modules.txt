@@ -1,0 +1,43 @@
+# github.com/cyrilix/robocar-base v0.0.0-20191227154304-47d48c39b0a2
+github.com/cyrilix/robocar-base/cli
+github.com/cyrilix/robocar-base/mqttdevice
+github.com/cyrilix/robocar-base/service
+github.com/cyrilix/robocar-base/types
+# github.com/eclipse/paho.mqtt.golang v1.2.0
+github.com/eclipse/paho.mqtt.golang
+github.com/eclipse/paho.mqtt.golang/packets
+# golang.org/x/net v0.0.0-20191126235420-ef20fe5d7933
+golang.org/x/net/internal/socks
+golang.org/x/net/proxy
+golang.org/x/net/websocket
+# periph.io/x/periph v3.6.2+incompatible
+periph.io/x/periph
+periph.io/x/periph/conn
+periph.io/x/periph/conn/gpio
+periph.io/x/periph/conn/gpio/gpioreg
+periph.io/x/periph/conn/gpio/gpiostream
+periph.io/x/periph/conn/i2c
+periph.io/x/periph/conn/i2c/i2creg
+periph.io/x/periph/conn/physic
+periph.io/x/periph/conn/pin
+periph.io/x/periph/conn/pin/pinreg
+periph.io/x/periph/conn/spi
+periph.io/x/periph/conn/spi/spireg
+periph.io/x/periph/experimental/devices/pca9685
+periph.io/x/periph/host
+periph.io/x/periph/host/allwinner
+periph.io/x/periph/host/am335x
+periph.io/x/periph/host/bcm283x
+periph.io/x/periph/host/beagle/black
+periph.io/x/periph/host/beagle/bone
+periph.io/x/periph/host/beagle/green
+periph.io/x/periph/host/chip
+periph.io/x/periph/host/cpu
+periph.io/x/periph/host/distro
+periph.io/x/periph/host/fs
+periph.io/x/periph/host/odroidc1
+periph.io/x/periph/host/pine64
+periph.io/x/periph/host/pmem
+periph.io/x/periph/host/rpi
+periph.io/x/periph/host/sysfs
+periph.io/x/periph/host/videocore
