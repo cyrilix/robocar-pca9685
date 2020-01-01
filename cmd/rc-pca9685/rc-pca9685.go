@@ -5,7 +5,7 @@ import (
 	"github.com/cyrilix/robocar-base/cli"
 	rc "github.com/cyrilix/robocar-pca9685/actuator"
 	"github.com/cyrilix/robocar-pca9685/part"
-	"log"
+	log "github.com/sirupsen/logrus"
 	"os"
 )
 
@@ -32,32 +32,32 @@ func main() {
 
 	var throttleChannel, throttleStoppedPWM, throttleMinPWM, throttleMaxPWM int
 	if err := cli.SetIntDefaultValueFromEnv(&throttleChannel, "THROTTLE_CHANNEL", ThrottleChannel); err != nil {
-		log.Printf("unable to init throttleChannel arg: %v", err)
+		log.Infof("unable to init throttleChannel arg: %v", err)
 	}
 	if err := cli.SetIntDefaultValueFromEnv(&throttleStoppedPWM, "THROTTLE_STOPPED_PWM", ThrottleStoppedPWM); err != nil {
-		log.Printf("unable to init throttleStoppedPWM arg: %v", err)
+		log.Infof("unable to init throttleStoppedPWM arg: %v", err)
 	}
 	if err := cli.SetIntDefaultValueFromEnv(&throttleMinPWM, "THROTTLE_MIN_PWM", ThrottleMinPWM); err != nil {
-		log.Printf("unable to init throttleMinPWM arg: %v", err)
+		log.Infof("unable to init throttleMinPWM arg: %v", err)
 	}
 	if err := cli.SetIntDefaultValueFromEnv(&throttleMaxPWM, "THROTTLE_MAX_PWM", ThrottleMaxPWM); err != nil {
-		log.Printf("unable to init throttleMaxPWM arg: %v", err)
+		log.Infof("unable to init throttleMaxPWM arg: %v", err)
 	}
 
 	var steeringChannel, steeringLeftPWM, steeringRightPWM int
 	if err := cli.SetIntDefaultValueFromEnv(&steeringChannel, "STEERING_CHANNEL", SteeringChannel); err != nil {
-		log.Printf("unable to init steeringChannel arg: %v", err)
+		log.Infof("unable to init steeringChannel arg: %v", err)
 	}
 	if err := cli.SetIntDefaultValueFromEnv(&steeringLeftPWM, "STEERING_LEFT_PWM", SteeringLeftPWM); err != nil {
-		log.Printf("unable to init steeringLeftPWM arg: %v", err)
+		log.Infof("unable to init steeringLeftPWM arg: %v", err)
 	}
 	if err := cli.SetIntDefaultValueFromEnv(&steeringRightPWM, "STEERING_RIGHT_PWM", SteeringRightPWM); err != nil {
-		log.Printf("unable to init steeringRightPWM arg: %v", err)
+		log.Infof("unable to init steeringRightPWM arg: %v", err)
 	}
 
 	var updatePWMFrequency int
 	if err := cli.SetIntDefaultValueFromEnv(&updatePWMFrequency, "UPDATE_PWM_FREQUENCY", 25); err != nil {
-		log.Printf("unable to init updatePWMFrequency arg: %v", err)
+		log.Infof("unable to init updatePWMFrequency arg: %v", err)
 	}
 
 	flag.StringVar(&topicThrottle, "mqtt-topic-throttle", os.Getenv("MQTT_TOPIC_THROTTLE"), "Mqtt topic that contains throttle value, use MQTT_TOPIC_THROTTLE if args not set")

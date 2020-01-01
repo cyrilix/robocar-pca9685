@@ -2,7 +2,7 @@ package actuator
 
 import (
 	"github.com/cyrilix/robocar-pca9685/util"
-	"log"
+	log "github.com/sirupsen/logrus"
 	"periph.io/x/periph/conn/gpio"
 	"periph.io/x/periph/experimental/devices/pca9685"
 )
@@ -21,18 +21,18 @@ type Throttle struct {
 func (t *Throttle) SetPulse(pulse int) {
 	err := t.dev.SetPwm(t.channel, 0, gpio.Duty(pulse))
 	if err != nil {
-		log.Printf("unable to set throttle pwm value: %v", err)
+		log.Infof("unable to set throttle pwm value: %v", err)
 	}
 
 }
 
 // Set percent value throttle
-func (t *Throttle) SetPercentValue(p float64) {
+func (t *Throttle) SetPercentValue(p float32) {
 	var pulse int
 	if p > 0 {
-		pulse = util.MapRange(p, 0, MaxThrottle, float64(t.zeroPulse), float64(t.maxPulse))
+		pulse = util.MapRange(float64(p), 0, MaxThrottle, float64(t.zeroPulse), float64(t.maxPulse))
 	} else {
-		pulse = util.MapRange(p, MinThrottle, 0, float64(t.minPulse), float64(t.zeroPulse))
+		pulse = util.MapRange(float64(p), MinThrottle, 0, float64(t.minPulse), float64(t.zeroPulse))
 	}
 	t.SetPulse(pulse)
 }

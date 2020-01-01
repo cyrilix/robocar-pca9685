@@ -2,7 +2,7 @@ package actuator
 
 import (
 	"github.com/cyrilix/robocar-pca9685/util"
-	"log"
+	log "github.com/sirupsen/logrus"
 	"periph.io/x/periph/conn/gpio"
 	"periph.io/x/periph/experimental/devices/pca9685"
 )
@@ -21,15 +21,15 @@ type Steering struct {
 func (s *Steering) SetPulse(pulse int) {
 	err := s.dev.SetPwm(s.channel, 0, gpio.Duty(pulse))
 	if err != nil {
-		log.Printf("unable to set throttle pwm value: %v", err)
+		log.Infof("unable to set throttle pwm value: %v", err)
 	}
 
 }
 
 // Set percent value steering
-func (s *Steering) SetPercentValue(p float64) {
+func (s *Steering) SetPercentValue(p float32) {
 	// map absolute angle to angle that vehicle can implement.
-	pulse := util.MapRange(p, LeftAngle, RightAngle, float64(s.leftPWM), float64(s.rightPWM))
+	pulse := util.MapRange(float64(p), LeftAngle, RightAngle, float64(s.leftPWM), float64(s.rightPWM))
 	s.SetPulse(pulse)
 }
 

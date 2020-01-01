@@ -1,13 +1,13 @@
 package part
 
 import (
-	"encoding/json"
 	"fmt"
 	"github.com/cyrilix/robocar-base/service"
-	"github.com/cyrilix/robocar-base/types"
 	"github.com/cyrilix/robocar-pca9685/actuator"
+	"github.com/cyrilix/robocar-protobuf/go/events"
 	MQTT "github.com/eclipse/paho.mqtt.golang"
-	"log"
+	"github.com/golang/protobuf/proto"
+	log "github.com/sirupsen/logrus"
 	"sync"
 	"time"
 )
@@ -18,9 +18,9 @@ type Pca9685Part struct {
 	steeringCtrl *actuator.Steering
 
 	muSteering    sync.Mutex
-	steeringValue float64
+	steeringValue float32
 	muThrottle    sync.Mutex
-	throttleValue float64
+	throttleValue float32
 
 	updateFrequency int
 
@@ -64,27 +64,27 @@ func (p *Pca9685Part) Stop() {
 }
 
 func (p *Pca9685Part) onThrottleChange(_ MQTT.Client, message MQTT.Message) {
-	var throttle types.Throttle
-	err := json.Unmarshal(message.Payload(), &throttle)
+	var throttle events.ThrottleMessage
+	err := proto.Unmarshal(message.Payload(), &throttle)
 	if err != nil {
-		log.Printf("[%v] unable to unmarshall throttle msg: %v", message.Topic(), err)
+		log.Infof("[%v] unable to unmarshall throttle msg: %v", message.Topic(), err)
 		return
 	}
 	p.muThrottle.Lock()
 	defer p.muThrottle.Unlock()
-	p.throttleCtrl.SetPercentValue(throttle.Value)
+	p.throttleCtrl.SetPercentValue(throttle.GetThrottle())
 }
 
 func (p *Pca9685Part) onSteeringChange(_ MQTT.Client, message MQTT.Message) {
-	var steering types.Steering
-	err := json.Unmarshal(message.Payload(), &steering)
+	var steering events.SteeringMessage
+	err := proto.Unmarshal(message.Payload(), &steering)
 	if err != nil {
-		log.Printf("[%v] unable to unmarshall steering msg: %v", message.Topic(), err)
+		log.Infof("[%v] unable to unmarshall steering msg: %v", message.Topic(), err)
 		return
 	}
 	p.muSteering.Lock()
 	defer p.muSteering.Unlock()
-	p.steeringCtrl.SetPercentValue(steering.Value)
+	p.steeringCtrl.SetPercentValue(steering.GetSteering())
 }
 
 func (p *Pca9685Part) registerCallbacks() error {
