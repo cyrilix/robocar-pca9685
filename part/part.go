@@ -26,6 +26,8 @@ type Pca9685Part struct {
 
 	throttleTopic string
 	steeringTopic string
+
+	cancel chan interface{}
 }
 
 func NewPca9685Part(client MQTT.Client, throttleCtrl *actuator.Throttle, steeringCtrl *actuator.Steering, updateFrequency int, throttleTopic, steeringTopic string) *Pca9685Part {
@@ -36,6 +38,7 @@ func NewPca9685Part(client MQTT.Client, throttleCtrl *actuator.Throttle, steerin
 		updateFrequency: updateFrequency,
 		throttleTopic:   throttleTopic,
 		steeringTopic:   steeringTopic,
+		cancel:          make(chan interface{}),
 	}
 }
 
@@ -43,22 +46,28 @@ func (p *Pca9685Part) Start() error {
 	if err := p.registerCallbacks(); err != nil {
 		return fmt.Errorf("unable to start service: %v", err)
 	}
-	defer p.Stop()
+	ticker := time.NewTicker(time.Second / time.Duration(p.updateFrequency))
+
 	for {
-		time.Sleep(time.Second / time.Duration(p.updateFrequency))
-		p.updateCtrl()
+		select {
+		case <-ticker.C:
+			p.updateCtrl()
+		case <-p.cancel:
+			return nil
+		}
 	}
 }
 
 func (p *Pca9685Part) Stop() {
+	close(p.cancel)
 	service.StopService("pca9685", p.client, p.throttleTopic, p.steeringTopic)
 }
 
 func (p *Pca9685Part) onThrottleChange(_ MQTT.Client, message MQTT.Message) {
 	var throttle types.Throttle
-	err := json.Unmarshal(message.Payload(), throttle)
+	err := json.Unmarshal(message.Payload(), &throttle)
 	if err != nil {
-		log.Printf("[%v] unable to unmarshall throttle msg: %v",message.Topic(), err)
+		log.Printf("[%v] unable to unmarshall throttle msg: %v", message.Topic(), err)
 		return
 	}
 	p.muThrottle.Lock()
@@ -68,9 +77,9 @@ func (p *Pca9685Part) onThrottleChange(_ MQTT.Client, message MQTT.Message) {
 
 func (p *Pca9685Part) onSteeringChange(_ MQTT.Client, message MQTT.Message) {
 	var steering types.Steering
-	err := json.Unmarshal(message.Payload(), steering)
+	err := json.Unmarshal(message.Payload(), &steering)
 	if err != nil {
-		log.Printf("[%v] unable to unmarshall steering msg: %v",message.Topic(), err)
+		log.Printf("[%v] unable to unmarshall steering msg: %v", message.Topic(), err)
 		return
 	}
 	p.muSteering.Lock()
