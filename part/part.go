@@ -67,9 +67,10 @@ func (p *Pca9685Part) onThrottleChange(_ MQTT.Client, message MQTT.Message) {
 	var throttle events.ThrottleMessage
 	err := proto.Unmarshal(message.Payload(), &throttle)
 	if err != nil {
-		log.Infof("[%v] unable to unmarshall throttle msg: %v", message.Topic(), err)
+		log.Warningf("[%v] unable to unmarshall throttle msg: %v", message.Topic(), err)
 		return
 	}
+	log.Debugf("new throttle value: %v", throttle.GetThrottle())
 	p.muThrottle.Lock()
 	defer p.muThrottle.Unlock()
 	p.throttleCtrl.SetPercentValue(throttle.GetThrottle())
@@ -79,7 +80,7 @@ func (p *Pca9685Part) onSteeringChange(_ MQTT.Client, message MQTT.Message) {
 	var steering events.SteeringMessage
 	err := proto.Unmarshal(message.Payload(), &steering)
 	if err != nil {
-		log.Infof("[%v] unable to unmarshall steering msg: %v", message.Topic(), err)
+		log.Warningf("[%v] unable to unmarshal steering msg: %v", message.Topic(), err)
 		return
 	}
 	p.muSteering.Lock()

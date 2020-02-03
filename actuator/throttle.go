@@ -34,6 +34,7 @@ func (t *Throttle) SetPercentValue(p float32) {
 	} else {
 		pulse = util.MapRange(float64(p), MinThrottle, 0, float64(t.minPulse), float64(t.zeroPulse))
 	}
+	log.Debugf("set throttle to %v-> %v (%v, %v, %v, %v, %v)", p, pulse, LeftAngle, RightAngle, t.minPulse, t.maxPulse, t.zeroPulse)
 	t.SetPulse(pulse)
 }
 
@@ -46,7 +47,7 @@ func NewThrottle(channel, zeroPulse, minPulse, maxPulse int) *Throttle {
 		maxPulse:  maxPulse,
 	}
 
-	log.Printf("send zero pulse to calibrate ESC: %v", zeroPulse)
+	log.Infof("send zero pulse to calibrate ESC")
 	t.SetPulse(zeroPulse)
 
 	return &t

@@ -21,7 +21,7 @@ type Steering struct {
 func (s *Steering) SetPulse(pulse int) {
 	err := s.dev.SetPwm(s.channel, 0, gpio.Duty(pulse))
 	if err != nil {
-		log.Infof("unable to set throttle pwm value: %v", err)
+		log.Warningf("unable to set steering pwm value: %v", err)
 	}
 
 }
