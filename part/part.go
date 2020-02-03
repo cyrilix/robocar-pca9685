@@ -9,7 +9,6 @@ import (
 	"github.com/golang/protobuf/proto"
 	log "github.com/sirupsen/logrus"
 	"sync"
-	"time"
 )
 
 type Pca9685Part struct {
@@ -46,12 +45,12 @@ func (p *Pca9685Part) Start() error {
 	if err := p.registerCallbacks(); err != nil {
 		return fmt.Errorf("unable to start service: %v", err)
 	}
-	ticker := time.NewTicker(time.Second / time.Duration(p.updateFrequency))
+
+	p.steeringCtrl.SetPercentValue(0)
+	p.throttleCtrl.SetPercentValue(0)
 
 	for {
 		select {
-		case <-ticker.C:
-			p.updateCtrl()
 		case <-p.cancel:
 			return nil
 		}
@@ -100,14 +99,4 @@ func (p *Pca9685Part) registerCallbacks() error {
 	}
 
 	return nil
-}
-
-func (p *Pca9685Part) updateCtrl() {
-	p.muThrottle.Lock()
-	defer p.muThrottle.Unlock()
-	p.throttleCtrl.SetPercentValue(p.throttleValue)
-
-	p.muSteering.Lock()
-	defer p.muSteering.Unlock()
-	p.steeringCtrl.SetPercentValue(p.steeringValue)
 }

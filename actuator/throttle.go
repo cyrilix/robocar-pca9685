@@ -48,7 +48,7 @@ func NewThrottle(channel, zeroPulse, minPulse, maxPulse int) *Throttle {
 	}
 
 	log.Infof("send zero pulse to calibrate ESC")
-	t.SetPulse(zeroPulse)
+	t.SetPercentValue(0)
 
 	return &t
 }

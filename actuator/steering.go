@@ -34,11 +34,11 @@ func (s *Steering) SetPercentValue(p float32) {
 }
 
 func NewSteering(channel, leftPWM, rightPWM int) *Steering {
-	t := Steering{
+	s := Steering{
 		channel:  channel,
 		dev:      device,
 		leftPWM:  leftPWM,
 		rightPWM: rightPWM,
 	}
-	return &t
+	return &s
 }
