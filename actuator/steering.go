@@ -3,8 +3,8 @@ package actuator
 import (
 	"github.com/cyrilix/robocar-pca9685/util"
 	log "github.com/sirupsen/logrus"
-	"periph.io/x/periph/conn/gpio"
-	"periph.io/x/periph/experimental/devices/pca9685"
+	"periph.io/x/conn/v3/gpio"
+	"periph.io/x/devices/v3/pca9685"
 )
 
 const (

@@ -2,10 +2,10 @@ package actuator
 
 import (
 	log "github.com/sirupsen/logrus"
-	"periph.io/x/periph/conn/i2c/i2creg"
-	"periph.io/x/periph/conn/physic"
-	"periph.io/x/periph/experimental/devices/pca9685"
-	"periph.io/x/periph/host"
+	"periph.io/x/conn/v3/i2c/i2creg"
+	"periph.io/x/conn/v3/physic"
+	"periph.io/x/devices/v3/pca9685"
+	"periph.io/x/host/v3"
 )
 
 var (
