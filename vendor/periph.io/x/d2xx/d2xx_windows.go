@@ -2,6 +2,8 @@
 // Use of this source code is governed under the Apache License, Version 2.0
 // that can be found in the LICENSE file.
 
+// +build !no_d2xx
+
 package d2xx
 
 import (
@@ -22,15 +24,21 @@ func version() (uint8, uint8, uint8) {
 }
 
 func createDeviceInfoList() (int, Err) {
-	var num uint32
-	r1, _, _ := pCreateDeviceInfoList.Call(uintptr(unsafe.Pointer(&num)))
-	return int(num), Err(r1)
+	if pCreateDeviceInfoList != nil {
+		var num uint32
+		r1, _, _ := pCreateDeviceInfoList.Call(uintptr(unsafe.Pointer(&num)))
+		return int(num), Err(r1)
+	}
+	return 0, Missing
 }
 
 func open(i int) (Handle, Err) {
 	var h handle
-	r1, _, _ := pOpen.Call(uintptr(i), uintptr(unsafe.Pointer(&h)))
-	return h, Err(r1)
+	if pOpen != nil {
+		r1, _, _ := pOpen.Call(uintptr(i), uintptr(unsafe.Pointer(&h)))
+		return h, Err(r1)
+	}
+	return h, Missing
 }
 
 func (h handle) Close() Err {

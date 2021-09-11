@@ -4,8 +4,6 @@
 # that can be found in the LICENSE file.
 
 # Builds the package on multiple OSes to confirm it builds fine.
-#
-# It is recommended to use the -i flag so subsequent runs are much faster.
 
 set -eu
 
@@ -13,13 +11,33 @@ cd `dirname $0`
 
 OPT=$*
 
+# Do not set CGO_ENABLED, as we want the default behavior when cross compiling,
+# which is different from when CGO_ENABLED=1.
+export -n CGO_ENABLED
+
+# Cleanup.
+export -n GOOS
+export -n GOARCH
+
 function build {
-  echo "Testing on $1/$2"
-  GOOS=$1 GOARCH=$2 go build $OPT
+  export GOOS=$1
+  export GOARCH=$2
+  echo "Building on $GOOS/$GOARCH"
+  go build $OPT
+  echo "Building on $GOOS/$GOARCH - no_d2xx"
+  go build -tags no_d2xx $OPT
+  echo "Building on $GOOS/$GOARCH - no cgo"
+  CGO_ENABLED=0 go build $OPT
+  echo "Building on $GOOS/$GOARCH - no cgo, no_d2xx"
+  CGO_ENABLED=0 go build -tags no_d2xx $OPT
 }
 
-build darwin amd64
-build linux amd64
-build linux arm
+CGO_ENABLED=1 CC=x86_64-linux-gnu-gcc build linux amd64
+# Requires: sudo apt install gcc-arm-linux-gnueabihf
+CGO_ENABLED=1 CC=arm-linux-gnueabihf-gcc build linux arm
+# Requires: sudo apt install gcc-aarch64-linux-gnu
+CGO_ENABLED=1 CC=aarch64-linux-gnu-gcc build linux arm64
+
 build linux 386
 build windows amd64
+build darwin amd64

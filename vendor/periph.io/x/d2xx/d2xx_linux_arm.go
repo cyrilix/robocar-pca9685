@@ -3,6 +3,7 @@
 // that can be found in the LICENSE file.
 
 // +build cgo
+// +build !no_d2xx
 
 package d2xx
 
@@ -10,6 +11,6 @@ package d2xx
 // optimal ARM architecture.
 
 /*
-#cgo LDFLAGS: ${SRCDIR}/third_party/libftd2xx_linux_arm6hf_v1.4.6.a
+#cgo LDFLAGS: ${SRCDIR}/third_party/libftd2xx_linux_arm6hf_v1.4.24.a
 */
 import "C"

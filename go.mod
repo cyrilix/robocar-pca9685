@@ -15,9 +15,9 @@ require (
 
 require (
 	github.com/gorilla/websocket v1.4.2 // indirect
-	github.com/konsorten/go-windows-terminal-sequences v1.0.1 // indirect
+	github.com/stretchr/testify v1.6.1 // indirect
 	golang.org/x/net v0.0.0-20200425230154-ff2c4b7c35a0 // indirect
 	golang.org/x/sys v0.0.0-20210525143221-35b2ab0089ea // indirect
 	google.golang.org/protobuf v1.26.0 // indirect
-	periph.io/x/d2xx v0.0.1 // indirect
+	periph.io/x/d2xx v0.0.3 // indirect
 )
