@@ -3,8 +3,8 @@ package main
 import (
 	"flag"
 	"github.com/cyrilix/robocar-base/cli"
-	rc "github.com/cyrilix/robocar-pca9685/actuator"
-	"github.com/cyrilix/robocar-pca9685/part"
+	actuator2 "github.com/cyrilix/robocar-pca9685/pkg/actuator"
+	"github.com/cyrilix/robocar-pca9685/pkg/part"
 	log "github.com/sirupsen/logrus"
 	"go.uber.org/zap"
 	"os"
@@ -103,8 +103,8 @@ func main() {
 	}
 	defer client.Disconnect(50)
 
-	t := rc.NewThrottle(throttleChannel, throttleStoppedPWM, throttleMinPWM, throttleMaxPWM)
-	s := rc.NewSteering(steeringChannel, steeringLeftPWM, steeringRightPWM)
+	t := actuator2.NewThrottle(throttleChannel, throttleStoppedPWM, throttleMinPWM, throttleMaxPWM)
+	s := actuator2.NewSteering(steeringChannel, steeringLeftPWM, steeringRightPWM)
 
 	p := part.NewPca9685Part(client, t, s, updatePWMFrequency, topicThrottle, topicSteering)
 	err = p.Start()

@@ -1,7 +1,7 @@
 package actuator
 
 import (
-	"github.com/cyrilix/robocar-pca9685/util"
+	"github.com/cyrilix/robocar-pca9685/pkg/util"
 	"go.uber.org/zap"
 	"periph.io/x/conn/v3/gpio"
 	"periph.io/x/devices/v3/pca9685"

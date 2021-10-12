@@ -3,7 +3,7 @@ package part
 import (
 	"fmt"
 	"github.com/cyrilix/robocar-base/service"
-	"github.com/cyrilix/robocar-pca9685/actuator"
+	"github.com/cyrilix/robocar-pca9685/pkg/actuator"
 	"github.com/cyrilix/robocar-protobuf/go/events"
 	MQTT "github.com/eclipse/paho.mqtt.golang"
 	"github.com/golang/protobuf/proto"
