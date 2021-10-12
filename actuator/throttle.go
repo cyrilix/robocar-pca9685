@@ -2,7 +2,7 @@ package actuator
 
 import (
 	"github.com/cyrilix/robocar-pca9685/util"
-	log "github.com/sirupsen/logrus"
+	"go.uber.org/zap"
 	"periph.io/x/conn/v3/gpio"
 	"periph.io/x/devices/v3/pca9685"
 )
@@ -21,7 +21,7 @@ type Throttle struct {
 func (t *Throttle) SetPulse(pulse int) {
 	err := t.dev.SetPwm(t.channel, 0, gpio.Duty(pulse))
 	if err != nil {
-		log.Infof("unable to set throttle pwm value: %v", err)
+		zap.S().Errorf("unable to set throttle pwm value: %v", err)
 	}
 
 }
@@ -34,7 +34,7 @@ func (t *Throttle) SetPercentValue(p float32) {
 	} else {
 		pulse = util.MapRange(float64(p), MinThrottle, 0, float64(t.minPulse), float64(t.zeroPulse))
 	}
-	log.Debugf("set throttle to %v-> %v (%v, %v, %v, %v, %v)", p, pulse, LeftAngle, RightAngle, t.minPulse, t.maxPulse, t.zeroPulse)
+	zap.S().Debugf("set throttle to %v-> %v (%v, %v, %v, %v, %v)", p, pulse, LeftAngle, RightAngle, t.minPulse, t.maxPulse, t.zeroPulse)
 	t.SetPulse(pulse)
 }
 
@@ -47,7 +47,7 @@ func NewThrottle(channel, zeroPulse, minPulse, maxPulse int) *Throttle {
 		maxPulse:  maxPulse,
 	}
 
-	log.Infof("send zero pulse to calibrate ESC")
+	zap.S().Info("send zero pulse to calibrate ESC")
 	t.SetPercentValue(0)
 
 	return &t

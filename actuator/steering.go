@@ -2,7 +2,7 @@ package actuator
 
 import (
 	"github.com/cyrilix/robocar-pca9685/util"
-	log "github.com/sirupsen/logrus"
+	"go.uber.org/zap"
 	"periph.io/x/conn/v3/gpio"
 	"periph.io/x/devices/v3/pca9685"
 )
@@ -21,7 +21,7 @@ type Steering struct {
 func (s *Steering) SetPulse(pulse int) {
 	err := s.dev.SetPwm(s.channel, 0, gpio.Duty(pulse))
 	if err != nil {
-		log.Warningf("unable to set steering pwm value: %v", err)
+		zap.S().Warnf("unable to set steering pwm value: %v", err)
 	}
 
 }

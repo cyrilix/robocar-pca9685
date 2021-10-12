@@ -7,7 +7,7 @@ import (
 	"github.com/cyrilix/robocar-protobuf/go/events"
 	MQTT "github.com/eclipse/paho.mqtt.golang"
 	"github.com/golang/protobuf/proto"
-	log "github.com/sirupsen/logrus"
+	"go.uber.org/zap"
 	"sync"
 )
 
@@ -66,10 +66,12 @@ func (p *Pca9685Part) onThrottleChange(_ MQTT.Client, message MQTT.Message) {
 	var throttle events.ThrottleMessage
 	err := proto.Unmarshal(message.Payload(), &throttle)
 	if err != nil {
-		log.Warningf("[%v] unable to unmarshall throttle msg: %v", message.Topic(), err)
+		zap.S().Warnw("unable to unmarshall throttle msg", "topic",
+			message.Topic(),
+			"error", err)
 		return
 	}
-	log.Debugf("new throttle value: %v", throttle.GetThrottle())
+	zap.S().Debugf("new throttle value: %v", throttle.GetThrottle())
 	p.muThrottle.Lock()
 	defer p.muThrottle.Unlock()
 	p.throttleCtrl.SetPercentValue(throttle.GetThrottle())
@@ -79,7 +81,10 @@ func (p *Pca9685Part) onSteeringChange(_ MQTT.Client, message MQTT.Message) {
 	var steering events.SteeringMessage
 	err := proto.Unmarshal(message.Payload(), &steering)
 	if err != nil {
-		log.Warningf("[%v] unable to unmarshal steering msg: %v", message.Topic(), err)
+		zap.S().Warnw("unable to unmarshal steering msg",
+			"topic", message.Topic(),
+			"error", err,
+		)
 		return
 	}
 	p.muSteering.Lock()

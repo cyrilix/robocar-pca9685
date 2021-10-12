@@ -6,6 +6,7 @@ import (
 	rc "github.com/cyrilix/robocar-pca9685/actuator"
 	"github.com/cyrilix/robocar-pca9685/part"
 	log "github.com/sirupsen/logrus"
+	"go.uber.org/zap"
 	"os"
 )
 
@@ -34,32 +35,32 @@ func main() {
 
 	var throttleChannel, throttleStoppedPWM, throttleMinPWM, throttleMaxPWM int
 	if err := cli.SetIntDefaultValueFromEnv(&throttleChannel, "THROTTLE_CHANNEL", ThrottleChannel); err != nil {
-		log.Warningf("unable to init throttleChannel arg: %v", err)
+		zap.S().Warnf("unable to init throttleChannel arg: %v", err)
 	}
 	if err := cli.SetIntDefaultValueFromEnv(&throttleStoppedPWM, "THROTTLE_STOPPED_PWM", ThrottleStoppedPWM); err != nil {
-		log.Warningf("unable to init throttleStoppedPWM arg: %v", err)
+		zap.S().Warnf("unable to init throttleStoppedPWM arg: %v", err)
 	}
 	if err := cli.SetIntDefaultValueFromEnv(&throttleMinPWM, "THROTTLE_MIN_PWM", ThrottleMinPWM); err != nil {
-		log.Warningf("unable to init throttleMinPWM arg: %v", err)
+		zap.S().Warnf("unable to init throttleMinPWM arg: %v", err)
 	}
 	if err := cli.SetIntDefaultValueFromEnv(&throttleMaxPWM, "THROTTLE_MAX_PWM", ThrottleMaxPWM); err != nil {
-		log.Warningf("unable to init throttleMaxPWM arg: %v", err)
+		zap.S().Warnf("unable to init throttleMaxPWM arg: %v", err)
 	}
 
 	var steeringChannel, steeringLeftPWM, steeringRightPWM int
 	if err := cli.SetIntDefaultValueFromEnv(&steeringChannel, "STEERING_CHANNEL", SteeringChannel); err != nil {
-		log.Warningf("unable to init steeringChannel arg: %v", err)
+		zap.S().Warnf("unable to init steeringChannel arg: %v", err)
 	}
 	if err := cli.SetIntDefaultValueFromEnv(&steeringLeftPWM, "STEERING_LEFT_PWM", SteeringLeftPWM); err != nil {
-		log.Warningf("unable to init steeringLeftPWM arg: %v", err)
+		zap.S().Warnf("unable to init steeringLeftPWM arg: %v", err)
 	}
 	if err := cli.SetIntDefaultValueFromEnv(&steeringRightPWM, "STEERING_RIGHT_PWM", SteeringRightPWM); err != nil {
-		log.Warningf("unable to init steeringRightPWM arg: %v", err)
+		zap.S().Warnf("unable to init steeringRightPWM arg: %v", err)
 	}
 
 	var updatePWMFrequency int
 	if err := cli.SetIntDefaultValueFromEnv(&updatePWMFrequency, "UPDATE_PWM_FREQUENCY", 25); err != nil {
-		log.Warningf("unable to init updatePWMFrequency arg: %v", err)
+		zap.S().Warnf("unable to init updatePWMFrequency arg: %v", err)
 	}
 
 	flag.StringVar(&topicThrottle, "mqtt-topic-throttle", os.Getenv("MQTT_TOPIC_THROTTLE"), "Mqtt topic that contains throttle value, use MQTT_TOPIC_THROTTLE if args not set")
@@ -79,13 +80,26 @@ func main() {
 		os.Exit(1)
 	}
 
+	config := zap.NewDevelopmentConfig()
 	if debug {
-		log.SetLevel(log.DebugLevel)
+		config.Level = zap.NewAtomicLevelAt(zap.DebugLevel)
+	} else {
+		config.Level = zap.NewAtomicLevelAt(zap.InfoLevel)
 	}
+	lgr, err := config.Build()
+	if err != nil {
+		log.Fatalf("unable to init logger: %v", err)
+	}
+	defer func() {
+		if err := lgr.Sync(); err != nil {
+			log.Printf("unable to Sync logger: %v\n", err)
+		}
+	}()
+	zap.ReplaceGlobals(lgr)
 
 	client, err := cli.Connect(mqttBroker, username, password, clientId)
 	if err != nil {
-		log.Fatalf("unable to connect to mqtt bus: %v", err)
+		zap.S().Fatalf("unable to connect to mqtt bus: %v", err)
 	}
 	defer client.Disconnect(50)
 
@@ -95,6 +109,6 @@ func main() {
 	p := part.NewPca9685Part(client, t, s, updatePWMFrequency, topicThrottle, topicSteering)
 	err = p.Start()
 	if err != nil {
-		log.Fatalf("unable to start service: %v", err)
+		zap.S().Fatalf("unable to start service: %v", err)
 	}
 }
