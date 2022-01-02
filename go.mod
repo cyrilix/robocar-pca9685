@@ -9,9 +9,9 @@ require (
 	github.com/golang/protobuf v1.5.2
 	github.com/sirupsen/logrus v1.8.1
 	go.uber.org/zap v1.19.1
-	periph.io/x/conn/v3 v3.6.8
-	periph.io/x/devices/v3 v3.6.11
-	periph.io/x/host/v3 v3.7.0
+	periph.io/x/conn/v3 v3.6.10
+	periph.io/x/devices/v3 v3.6.13
+	periph.io/x/host/v3 v3.7.2
 )
 
 require (
@@ -19,7 +19,6 @@ require (
 	go.uber.org/atomic v1.7.0 // indirect
 	go.uber.org/multierr v1.6.0 // indirect
 	golang.org/x/net v0.0.0-20210405180319-a5a99cb37ef4 // indirect
-	golang.org/x/sys v0.0.0-20210525143221-35b2ab0089ea // indirect
+	golang.org/x/sys v0.0.0-20211210111614-af8b64212486 // indirect
 	google.golang.org/protobuf v1.26.0 // indirect
-	periph.io/x/d2xx v0.0.3 // indirect
 )

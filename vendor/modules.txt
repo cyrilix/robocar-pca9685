@@ -37,7 +37,7 @@ go.uber.org/zap/zapcore
 ## explicit; go 1.11
 golang.org/x/net/internal/socks
 golang.org/x/net/proxy
-# golang.org/x/sys v0.0.0-20210525143221-35b2ab0089ea
+# golang.org/x/sys v0.0.0-20211210111614-af8b64212486
 ## explicit; go 1.17
 golang.org/x/sys/internal/unsafeheader
 golang.org/x/sys/unix
@@ -72,7 +72,7 @@ google.golang.org/protobuf/runtime/protoiface
 google.golang.org/protobuf/runtime/protoimpl
 google.golang.org/protobuf/types/descriptorpb
 google.golang.org/protobuf/types/known/timestamppb
-# periph.io/x/conn/v3 v3.6.8
+# periph.io/x/conn/v3 v3.6.10
 ## explicit; go 1.13
 periph.io/x/conn/v3
 periph.io/x/conn/v3/driver
@@ -87,13 +87,10 @@ periph.io/x/conn/v3/pin
 periph.io/x/conn/v3/pin/pinreg
 periph.io/x/conn/v3/spi
 periph.io/x/conn/v3/spi/spireg
-# periph.io/x/d2xx v0.0.3
-## explicit; go 1.13
-periph.io/x/d2xx
-# periph.io/x/devices/v3 v3.6.11
-## explicit; go 1.13
+# periph.io/x/devices/v3 v3.6.13
+## explicit; go 1.14
 periph.io/x/devices/v3/pca9685
-# periph.io/x/host/v3 v3.7.0
+# periph.io/x/host/v3 v3.7.2
 ## explicit; go 1.13
 periph.io/x/host/v3
 periph.io/x/host/v3/allwinner
@@ -106,7 +103,6 @@ periph.io/x/host/v3/chip
 periph.io/x/host/v3/cpu
 periph.io/x/host/v3/distro
 periph.io/x/host/v3/fs
-periph.io/x/host/v3/ftdi
 periph.io/x/host/v3/odroidc1
 periph.io/x/host/v3/pine64
 periph.io/x/host/v3/pmem
