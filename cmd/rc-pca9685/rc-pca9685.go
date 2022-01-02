@@ -5,8 +5,8 @@ import (
 	"github.com/cyrilix/robocar-base/cli"
 	actuator2 "github.com/cyrilix/robocar-pca9685/pkg/actuator"
 	"github.com/cyrilix/robocar-pca9685/pkg/part"
-	log "github.com/sirupsen/logrus"
 	"go.uber.org/zap"
+	"log"
 	"os"
 )
 
@@ -25,13 +25,11 @@ const (
 
 func main() {
 	var mqttBroker, username, password, clientId, topicThrottle, topicSteering string
-	var debug bool
 
 	mqttQos := cli.InitIntFlag("MQTT_QOS", 0)
 	_, mqttRetain := os.LookupEnv("MQTT_RETAIN")
 
 	cli.InitMqttFlags(DefaultClientId, &mqttBroker, &username, &password, &clientId, &mqttQos, &mqttRetain)
-	flag.BoolVar(&debug, "debug", false, "Display raw value to debug")
 
 	var throttleChannel, throttleStoppedPWM, throttleMinPWM, throttleMaxPWM int
 	if err := cli.SetIntDefaultValueFromEnv(&throttleChannel, "THROTTLE_CHANNEL", ThrottleChannel); err != nil {
@@ -74,6 +72,8 @@ func main() {
 	flag.IntVar(&steeringRightPWM, "steering-right-pwm", steeringRightPWM, "Max right value for steering PWM, STEERING_MIN_PWM env if args not set")
 	flag.IntVar(&updatePWMFrequency, "update-pwm-frequency", updatePWMFrequency, "Number of update values per seconds, UPDATE_PWM_FREQUENCY env if args not set")
 
+	logLevel := zap.LevelFlag("log", zap.InfoLevel, "log level")
+
 	flag.Parse()
 	if len(os.Args) <= 1 {
 		flag.PrintDefaults()
@@ -81,11 +81,7 @@ func main() {
 	}
 
 	config := zap.NewDevelopmentConfig()
-	if debug {
-		config.Level = zap.NewAtomicLevelAt(zap.DebugLevel)
-	} else {
-		config.Level = zap.NewAtomicLevelAt(zap.InfoLevel)
-	}
+	config.Level = zap.NewAtomicLevelAt(*logLevel)
 	lgr, err := config.Build()
 	if err != nil {
 		log.Fatalf("unable to init logger: %v", err)
@@ -96,7 +92,6 @@ func main() {
 		}
 	}()
 	zap.ReplaceGlobals(lgr)
-
 	client, err := cli.Connect(mqttBroker, username, password, clientId)
 	if err != nil {
 		zap.S().Fatalf("unable to connect to mqtt bus: %v", err)
