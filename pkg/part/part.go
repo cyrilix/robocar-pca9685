@@ -6,8 +6,8 @@ import (
 	"github.com/cyrilix/robocar-pca9685/pkg/actuator"
 	"github.com/cyrilix/robocar-protobuf/go/events"
 	MQTT "github.com/eclipse/paho.mqtt.golang"
-	"github.com/golang/protobuf/proto"
 	"go.uber.org/zap"
+	"google.golang.org/protobuf/proto"
 	"sync"
 )
 
