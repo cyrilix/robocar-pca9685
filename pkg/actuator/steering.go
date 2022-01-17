@@ -13,9 +13,9 @@ const (
 )
 
 type Steering struct {
-	channel           int
-	leftPWM, rightPWM int
-	dev               *pca9685.Dev
+	channel                      int
+	leftPWM, rightPWM, centerPWM int
+	dev                          *pca9685.Dev
 }
 
 func (s *Steering) SetPulse(pulse int) {
@@ -26,19 +26,26 @@ func (s *Steering) SetPulse(pulse int) {
 
 }
 
-// Set percent value steering
+// SetPercentValue Set percent value steering
 func (s *Steering) SetPercentValue(p float32) {
 	// map absolute angle to angle that vehicle can implement.
-	pulse := util.MapRange(float64(p), LeftAngle, RightAngle, float64(s.leftPWM), float64(s.rightPWM))
+
+	pulse := s.centerPWM
+	if p > 0 {
+		pulse = util.MapRange(float64(p), 0, RightAngle, float64(s.centerPWM), float64(s.rightPWM))
+	} else if p < 0 {
+		pulse = util.MapRange(float64(p), LeftAngle, 0, float64(s.leftPWM), float64(s.centerPWM))
+	}
 	s.SetPulse(pulse)
 }
 
-func NewSteering(channel, leftPWM, rightPWM int) *Steering {
+func NewSteering(channel, leftPWM, rightPWM, centerPWM int) *Steering {
 	s := Steering{
-		channel:  channel,
-		dev:      device,
-		leftPWM:  leftPWM,
-		rightPWM: rightPWM,
+		channel:   channel,
+		dev:       device,
+		leftPWM:   leftPWM,
+		rightPWM:  rightPWM,
+		centerPWM: centerPWM,
 	}
 	return &s
 }

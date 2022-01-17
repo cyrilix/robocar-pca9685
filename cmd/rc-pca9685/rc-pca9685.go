@@ -23,6 +23,10 @@ const (
 	SteeringRightPWM = 1986
 )
 
+var (
+	SteeringCenterPWM = (SteeringRightPWM-SteeringLeftPWM)/2 + SteeringLeftPWM
+)
+
 func main() {
 	var mqttBroker, username, password, clientId, topicThrottle, topicSteering string
 
@@ -45,7 +49,7 @@ func main() {
 		zap.S().Warnf("unable to init throttleMaxPWM arg: %v", err)
 	}
 
-	var steeringChannel, steeringLeftPWM, steeringRightPWM int
+	var steeringChannel, steeringLeftPWM, steeringRightPWM, steeringCenterPWM int
 	if err := cli.SetIntDefaultValueFromEnv(&steeringChannel, "STEERING_CHANNEL", SteeringChannel); err != nil {
 		zap.S().Warnf("unable to init steeringChannel arg: %v", err)
 	}
@@ -53,6 +57,9 @@ func main() {
 		zap.S().Warnf("unable to init steeringLeftPWM arg: %v", err)
 	}
 	if err := cli.SetIntDefaultValueFromEnv(&steeringRightPWM, "STEERING_RIGHT_PWM", SteeringRightPWM); err != nil {
+		zap.S().Warnf("unable to init steeringRightPWM arg: %v", err)
+	}
+	if err := cli.SetIntDefaultValueFromEnv(&steeringCenterPWM, "STEERING_CENTER_PWM", SteeringCenterPWM); err != nil {
 		zap.S().Warnf("unable to init steeringRightPWM arg: %v", err)
 	}
 
@@ -66,10 +73,11 @@ func main() {
 	flag.IntVar(&throttleChannel, "throttle-channel", throttleChannel, "I2C channel to use to control throttle, THROTTLE_CHANNEL env if args not set")
 	flag.IntVar(&steeringChannel, "steering-channel", steeringChannel, "I2C channel to use to control steering, STEERING_CHANNEL env if args not set")
 	flag.IntVar(&throttleStoppedPWM, "throttle-zero-pwm", throttleStoppedPWM, "Zero value for throttle PWM, THROTTLE_STOPPED_PWM env if args not set")
-	flag.IntVar(&throttleMinPWM, "throttle-min-pwm", throttleMinPWM, "Min value for throttle PWM, THROTTLE_MIN_PWM env if args not set")
-	flag.IntVar(&throttleMaxPWM, "throttle-max-pwm", throttleMaxPWM, "Max value for throttle PWM, THROTTLE_MAX_PWM env if args not set")
-	flag.IntVar(&steeringLeftPWM, "steering-left-pwm", steeringLeftPWM, "Max left value for steering PWM, STEERING_STOPPED_PWM env if args not set")
-	flag.IntVar(&steeringRightPWM, "steering-right-pwm", steeringRightPWM, "Max right value for steering PWM, STEERING_MIN_PWM env if args not set")
+	flag.IntVar(&throttleMinPWM, "throttle-min-pwm", throttleMinPWM, "Left value for throttle PWM, THROTTLE_MIN_PWM env if args not set")
+	flag.IntVar(&throttleMaxPWM, "throttle-max-pwm", throttleMaxPWM, "Right value for throttle PWM, THROTTLE_MAX_PWM env if args not set")
+	flag.IntVar(&steeringLeftPWM, "steering-left-pwm", steeringLeftPWM, "Right left value for steering PWM, STEERING_LEFT_PWM env if args not set")
+	flag.IntVar(&steeringRightPWM, "steering-right-pwm", steeringRightPWM, "Right right value for steering PWM, STEERING_RIGHT_PWM env if args not set")
+	flag.IntVar(&steeringCenterPWM, "steering-center-pwm", steeringCenterPWM, "Center value for steering PWM, STEERING_CENTER_PWM env if args not set")
 	flag.IntVar(&updatePWMFrequency, "update-pwm-frequency", updatePWMFrequency, "Number of update values per seconds, UPDATE_PWM_FREQUENCY env if args not set")
 
 	logLevel := zap.LevelFlag("log", zap.InfoLevel, "log level")
@@ -99,7 +107,7 @@ func main() {
 	defer client.Disconnect(50)
 
 	t := actuator2.NewThrottle(throttleChannel, throttleStoppedPWM, throttleMinPWM, throttleMaxPWM)
-	s := actuator2.NewSteering(steeringChannel, steeringLeftPWM, steeringRightPWM)
+	s := actuator2.NewSteering(steeringChannel, steeringLeftPWM, steeringRightPWM, steeringCenterPWM)
 
 	p := part.NewPca9685Part(client, t, s, updatePWMFrequency, topicThrottle, topicSteering)
 	err = p.Start()
