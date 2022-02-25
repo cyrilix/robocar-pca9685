@@ -87,6 +87,7 @@ func (p *Pca9685Part) onSteeringChange(_ MQTT.Client, message MQTT.Message) {
 		)
 		return
 	}
+	zap.S().Debugf("new steering value: %v", steering.GetSteering())
 	p.muSteering.Lock()
 	defer p.muSteering.Unlock()
 	p.steeringCtrl.SetPercentValue(steering.GetSteering())
