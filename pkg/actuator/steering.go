@@ -36,6 +36,7 @@ func (s *Steering) SetPercentValue(p float32) {
 	} else if p < 0 {
 		pulse = util.MapRange(float64(p), LeftAngle, 0, float64(s.leftPWM), float64(s.centerPWM))
 	}
+	zap.S().Debugf("convert steering %v to %v", p, pulse)
 	s.SetPulse(pulse)
 }
 
