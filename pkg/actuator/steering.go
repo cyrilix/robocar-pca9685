@@ -30,7 +30,7 @@ func (s *Steering) SetPulse(pulse int) {
 func (s *Steering) SetPercentValue(p float32) {
 	// map absolute angle to angle that vehicle can implement.
 
-	pulse := s.centerPWM
+	pulse := 0
 	if p > 0 {
 		pulse = util.MapRange(float64(p), 0, RightAngle, float64(s.centerPWM), float64(s.rightPWM))
 	} else if p < 0 {
