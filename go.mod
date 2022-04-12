@@ -1,12 +1,12 @@
 module github.com/cyrilix/robocar-pca9685
 
-go 1.17
+go 1.18
 
 require (
 	github.com/cyrilix/robocar-base v0.1.6
 	github.com/cyrilix/robocar-protobuf/go v1.0.4
 	github.com/eclipse/paho.mqtt.golang v1.3.5
-	go.uber.org/zap v1.19.1
+	go.uber.org/zap v1.21.0
 	google.golang.org/protobuf v1.27.1
 	periph.io/x/conn/v3 v3.6.10
 	periph.io/x/devices/v3 v3.6.13
