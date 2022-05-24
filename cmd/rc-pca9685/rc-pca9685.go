@@ -3,11 +3,12 @@ package main
 import (
 	"flag"
 	"github.com/cyrilix/robocar-base/cli"
-	actuator2 "github.com/cyrilix/robocar-pca9685/pkg/actuator"
+	"github.com/cyrilix/robocar-pca9685/pkg/actuator"
 	"github.com/cyrilix/robocar-pca9685/pkg/part"
 	"go.uber.org/zap"
 	"log"
 	"os"
+	"periph.io/x/conn/v3/physic"
 )
 
 const (
@@ -21,6 +22,8 @@ const (
 
 	SteeringLeftPWM  = 1004
 	SteeringRightPWM = 1986
+
+	DefaultFrequency = 60 * physic.Hertz
 )
 
 var (
@@ -106,10 +109,47 @@ func main() {
 	}
 	defer client.Disconnect(50)
 
-	t := actuator2.NewThrottle(throttleChannel, throttleStoppedPWM, throttleMinPWM, throttleMaxPWM)
-	s := actuator2.NewSteering(steeringChannel, steeringLeftPWM, steeringRightPWM, steeringCenterPWM)
+	freq := DefaultFrequency
+
+	zap.S().Infof("throttle channel  : %v", throttleChannel)
+	zap.S().Infof("throttle frequency: %v", freq)
+	zap.S().Infof("throttle zero     : %v", throttleStoppedPWM)
+	zap.S().Infof("throttle min      : %v", throttleMinPWM)
+	zap.S().Infof("throttle max      : %v", throttleMaxPWM)
+
+	zap.S().Infof("steering channel  : %v", steeringChannel)
+	zap.S().Infof("steering frequency: %v", freq)
+	zap.S().Infof("steering center   : %v", steeringCenterPWM)
+	zap.S().Infof("steering left     : %v", steeringLeftPWM)
+	zap.S().Infof("steering right    : %v", steeringRightPWM)
+
+	dev := actuator.NewDevice(freq)
+
+	t, err := actuator.NewPca9685Controller(
+		dev,
+		throttleChannel,
+		actuator.PWM(throttleMinPWM), actuator.PWM(throttleMaxPWM), actuator.PWM(throttleStoppedPWM),
+		freq,
+	)
+	if err != nil {
+		zap.S().Panicf("unable to init throttle controller: %v", err)
+	}
+
+	s, err := actuator.NewPca9685Controller(
+		dev,
+		steeringChannel,
+		actuator.PWM(steeringLeftPWM), actuator.PWM(steeringRightPWM), actuator.PWM(steeringCenterPWM),
+		freq,
+	)
+	if err != nil {
+		zap.S().Panicf("unable to init steering controller: %v", err)
+	}
 
 	p := part.NewPca9685Part(client, t, s, updatePWMFrequency, topicThrottle, topicSteering)
+
+	cli.HandleExit(p)
+
+	zap.S().Info("devices ready, start event listener")
 	err = p.Start()
 	if err != nil {
 		zap.S().Fatalf("unable to start service: %v", err)

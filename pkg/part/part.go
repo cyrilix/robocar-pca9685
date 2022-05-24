@@ -3,18 +3,24 @@ package part
 import (
 	"fmt"
 	"github.com/cyrilix/robocar-base/service"
-	"github.com/cyrilix/robocar-pca9685/pkg/actuator"
 	"github.com/cyrilix/robocar-protobuf/go/events"
 	MQTT "github.com/eclipse/paho.mqtt.golang"
 	"go.uber.org/zap"
 	"google.golang.org/protobuf/proto"
+	"io"
 	"sync"
 )
 
+type ActuatorController interface {
+	// SetPercentValue Set percent value
+	SetPercentValue(p float32) error
+	io.Closer
+}
+
 type Pca9685Part struct {
 	client       MQTT.Client
-	throttleCtrl *actuator.Throttle
-	steeringCtrl *actuator.Steering
+	throttleCtrl ActuatorController
+	steeringCtrl ActuatorController
 
 	muSteering    sync.Mutex
 	steeringValue float32
@@ -29,7 +35,7 @@ type Pca9685Part struct {
 	cancel chan interface{}
 }
 
-func NewPca9685Part(client MQTT.Client, throttleCtrl *actuator.Throttle, steeringCtrl *actuator.Steering, updateFrequency int, throttleTopic, steeringTopic string) *Pca9685Part {
+func NewPca9685Part(client MQTT.Client, throttleCtrl ActuatorController, steeringCtrl ActuatorController, updateFrequency int, throttleTopic, steeringTopic string) *Pca9685Part {
 	return &Pca9685Part{
 		client:          client,
 		throttleCtrl:    throttleCtrl,
@@ -46,8 +52,12 @@ func (p *Pca9685Part) Start() error {
 		return fmt.Errorf("unable to start service: %v", err)
 	}
 
-	p.steeringCtrl.SetPercentValue(0)
-	p.throttleCtrl.SetPercentValue(0)
+	if err := p.steeringCtrl.SetPercentValue(0); err != nil {
+		return fmt.Errorf("unable to start steering controller: %w", err)
+	}
+	if err := p.throttleCtrl.SetPercentValue(0); err != nil {
+		return fmt.Errorf("unable to set init value '0%%': %w", err)
+	}
 
 	for {
 		select {
@@ -59,6 +69,12 @@ func (p *Pca9685Part) Start() error {
 
 func (p *Pca9685Part) Stop() {
 	close(p.cancel)
+	if err := p.steeringCtrl.Close(); err != nil {
+		zap.S().Errorf("unable to close steering controller: %v", err)
+	}
+	if err := p.throttleCtrl.Close(); err != nil {
+		zap.S().Errorf("unable to close throttle controller: %v", err)
+	}
 	service.StopService("pca9685", p.client, p.throttleTopic, p.steeringTopic)
 }
 
@@ -74,7 +90,10 @@ func (p *Pca9685Part) onThrottleChange(_ MQTT.Client, message MQTT.Message) {
 	zap.S().Debugf("new throttle value: %v", throttle.GetThrottle())
 	p.muThrottle.Lock()
 	defer p.muThrottle.Unlock()
-	p.throttleCtrl.SetPercentValue(throttle.GetThrottle())
+	err = p.throttleCtrl.SetPercentValue(throttle.GetThrottle())
+	if err != nil {
+		zap.S().Errorf("unable to set steering value '%v': %w", throttle.GetThrottle(), err)
+	}
 }
 
 func (p *Pca9685Part) onSteeringChange(_ MQTT.Client, message MQTT.Message) {
@@ -90,7 +109,10 @@ func (p *Pca9685Part) onSteeringChange(_ MQTT.Client, message MQTT.Message) {
 	zap.S().Debugf("new steering value: %v", steering.GetSteering())
 	p.muSteering.Lock()
 	defer p.muSteering.Unlock()
-	p.steeringCtrl.SetPercentValue(steering.GetSteering())
+	err = p.steeringCtrl.SetPercentValue(steering.GetSteering())
+	if err != nil {
+		zap.S().Errorf("unable to set steering value '%v': %w", steering.GetSteering(), err)
+	}
 }
 
 func (p *Pca9685Part) registerCallbacks() error {
