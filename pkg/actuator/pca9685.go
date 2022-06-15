@@ -36,7 +36,7 @@ func NewDevice(freq physic.Frequency) *pca9685.Dev {
 	if err != nil {
 		zap.S().Fatalf("unable to NewDevice pca9685 bus: %v", err)
 	}
-	zap.S().Infof("set pwm frequency to %d", 60)
+	zap.S().Infof("set pwm frequency to %v", freq)
 	err = device.SetPwmFreq(freq)
 	if err != nil {
 		zap.S().Panicf("unable to set pwm frequency: %v", err)
@@ -45,17 +45,17 @@ func NewDevice(freq physic.Frequency) *pca9685.Dev {
 	return device
 }
 
-func convertToDuty(percent float32, freq physic.Frequency, centerPWM, minPWM, maxPWM PWM) (gpio.Duty, error) {
+func (c *Pca9685Controller) convertToDuty(percent float32) (gpio.Duty, error) {
 	// map absolute angle to angle that vehicle can implement.
-	pw := int(centerPWM)
+	pw := int(c.neutralPWM)
 	if percent > 0 {
-		pw = util.MapRange(float64(percent), 0, MaxPercent, float64(centerPWM), float64(maxPWM))
+		pw = util.MapRange(float64(percent), 0, MaxPercent, float64(c.neutralPWM), float64(c.maxPWM))
 	} else if percent < 0 {
-		pw = util.MapRange(float64(percent), MinPercent, 0, float64(minPWM), float64(centerPWM))
+		pw = util.MapRange(float64(percent), MinPercent, 0, float64(c.minPWM), float64(c.neutralPWM))
 	}
-	zap.S().Debugf("convert value %v to pw: %v", percent, pw)
+	c.logr.Debugf("convert value %v to pw: %v", percent, pw)
 
-	per := freq.Period().Microseconds()
+	per := c.freq.Period().Microseconds()
 
 	draw := float64(pw) / float64(per)
 	d, err := gpio.ParseDuty(fmt.Sprintf("%.f%%", draw*100))
@@ -66,6 +66,7 @@ func convertToDuty(percent float32, freq physic.Frequency, centerPWM, minPWM, ma
 }
 
 type Pca9685Controller struct {
+	logr                       *zap.SugaredLogger
 	pin                        gpio.PinIO
 	minPWM, maxPWM, neutralPWM PWM
 	freq                       physic.Frequency
@@ -85,7 +86,7 @@ func (c *Pca9685Controller) SetDuty(d gpio.Duty) error {
 
 // SetPercentValue Set percent value
 func (c *Pca9685Controller) SetPercentValue(p float32) error {
-	d, err := convertToDuty(p, c.freq, c.neutralPWM, c.minPWM, c.maxPWM)
+	d, err := c.convertToDuty(p)
 	if err != nil {
 		return fmt.Errorf("unable to compute Duty value for steering: %w", err)
 	}
@@ -96,7 +97,7 @@ func (c *Pca9685Controller) SetPercentValue(p float32) error {
 	return nil
 }
 
-func NewPca9685Controller(device *pca9685.Dev, channel int, minPWM, maxPWM, neutralPWM PWM, freq physic.Frequency) (*Pca9685Controller, error) {
+func NewPca9685Controller(device *pca9685.Dev, channel int, minPWM, maxPWM, neutralPWM PWM, freq physic.Frequency, logr *zap.SugaredLogger) (*Pca9685Controller, error) {
 	p, err := device.CreatePin(channel)
 	if err != nil {
 		return nil, fmt.Errorf("unable to create pin for channel %v: %w", channel, err)
@@ -107,6 +108,7 @@ func NewPca9685Controller(device *pca9685.Dev, channel int, minPWM, maxPWM, neut
 		maxPWM:     maxPWM,
 		neutralPWM: neutralPWM,
 		freq:       freq,
+		logr:       logr,
 	}
 	return &s, nil
 }

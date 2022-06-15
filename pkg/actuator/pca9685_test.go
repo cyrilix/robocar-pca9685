@@ -64,8 +64,16 @@ func Test_convertToDuty(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			c := Pca9685Controller{
+				logr:       zap.S(),
+				pin:        nil,
+				minPWM:     tt.args.leftPWM,
+				maxPWM:     tt.args.rightPWM,
+				neutralPWM: tt.args.centerPWM,
+				freq:       tt.args.freq,
+			}
 
-			if got, err := convertToDuty(tt.args.percent, tt.args.freq, tt.args.centerPWM, tt.args.leftPWM, tt.args.rightPWM); got.String() != tt.want {
+			if got, err := c.convertToDuty(tt.args.percent); got.String() != tt.want {
 				if tt.wantErr && err == nil {
 					t.Errorf("an error is expected")
 					return

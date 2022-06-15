@@ -129,6 +129,7 @@ func main() {
 		throttleChannel,
 		actuator.PWM(throttleMinPWM), actuator.PWM(throttleMaxPWM), actuator.PWM(throttleStoppedPWM),
 		freq,
+		zap.S().With("actuator", "throttle"),
 	)
 	if err != nil {
 		zap.S().Panicf("unable to init throttle controller: %v", err)
@@ -139,6 +140,7 @@ func main() {
 		steeringChannel,
 		actuator.PWM(steeringLeftPWM), actuator.PWM(steeringRightPWM), actuator.PWM(steeringCenterPWM),
 		freq,
+		zap.S().With("actuator", "steering"),
 	)
 	if err != nil {
 		zap.S().Panicf("unable to init steering controller: %v", err)
