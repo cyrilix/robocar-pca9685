@@ -22,8 +22,6 @@ const (
 
 	SteeringLeftPWM  = 1004
 	SteeringRightPWM = 1986
-
-	DefaultFrequency = 60 * physic.Hertz
 )
 
 var (
@@ -66,7 +64,7 @@ func main() {
 		zap.S().Warnf("unable to init steeringRightPWM arg: %v", err)
 	}
 
-	var updatePWMFrequency int
+	var updatePWMFrequency, pwmFreq int
 	if err := cli.SetIntDefaultValueFromEnv(&updatePWMFrequency, "UPDATE_PWM_FREQUENCY", 25); err != nil {
 		zap.S().Warnf("unable to init updatePWMFrequency arg: %v", err)
 	}
@@ -81,6 +79,7 @@ func main() {
 	flag.IntVar(&steeringLeftPWM, "steering-left-pwm", steeringLeftPWM, "Right left value for steering PWM, STEERING_LEFT_PWM env if args not set")
 	flag.IntVar(&steeringRightPWM, "steering-right-pwm", steeringRightPWM, "Right right value for steering PWM, STEERING_RIGHT_PWM env if args not set")
 	flag.IntVar(&steeringCenterPWM, "steering-center-pwm", steeringCenterPWM, "Center value for steering PWM, STEERING_CENTER_PWM env if args not set")
+	flag.IntVar(&pwmFreq, "pwm-freq", 60, "PWM frequency in Hz")
 	flag.IntVar(&updatePWMFrequency, "update-pwm-frequency", updatePWMFrequency, "Number of update values per seconds, UPDATE_PWM_FREQUENCY env if args not set")
 
 	logLevel := zap.LevelFlag("log", zap.InfoLevel, "log level")
@@ -109,7 +108,7 @@ func main() {
 	}
 	defer client.Disconnect(50)
 
-	freq := DefaultFrequency
+	freq := physic.Frequency(pwmFreq) * physic.Hertz
 
 	zap.S().Infof("throttle channel  : %v", throttleChannel)
 	zap.S().Infof("throttle frequency: %v", freq)
