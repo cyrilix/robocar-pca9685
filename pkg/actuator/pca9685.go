@@ -58,11 +58,15 @@ func (c *Pca9685Controller) convertToDuty(percent float32) (gpio.Duty, error) {
 	per := c.freq.Period().Microseconds()
 
 	draw := float64(pw) / float64(per)
-	d, err := gpio.ParseDuty(fmt.Sprintf("%.f%%", draw*100))
-	if err != nil {
-		return 0, fmt.Errorf("unable to parse duty, probably bad compute: %w", err)
-	}
-	return d, nil
+	return gpio.Duty(int32(draw * float64(gpio.DutyMax))), nil
+	/*
+		d, err := gpio.ParseDuty(strconv.Itoa(int(dd)))
+		// d, err := gpio.ParseDuty(fmt.Sprintf("%.f%%", draw*100))
+		if err != nil {
+			return 0, fmt.Errorf("unable to parse duty, probably bad compute: %w", err)
+		}
+		return d, nil
+	*/
 }
 
 type Pca9685Controller struct {
@@ -77,6 +81,8 @@ func (c *Pca9685Controller) Close() error {
 }
 
 func (c *Pca9685Controller) SetDuty(d gpio.Duty) error {
+	c.logr.Debugf("set duty %v -> %d (12bits value: %d)", d.String(), d, d>>12)
+
 	err := c.pin.PWM(d, c.freq)
 	if err != nil {
 		return fmt.Errorf("unable to set pwm value: %v", err)
