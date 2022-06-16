@@ -128,6 +128,7 @@ func main() {
 		dev,
 		throttleChannel,
 		actuator.PWM(throttleMinPWM), actuator.PWM(throttleMaxPWM), actuator.PWM(throttleStoppedPWM),
+		-1., 1.,
 		freq,
 		zap.S().With("actuator", "throttle"),
 	)
@@ -139,6 +140,7 @@ func main() {
 		dev,
 		steeringChannel,
 		actuator.PWM(steeringLeftPWM), actuator.PWM(steeringRightPWM), actuator.PWM(steeringCenterPWM),
+		1., -1.,
 		freq,
 		zap.S().With("actuator", "steering"),
 	)

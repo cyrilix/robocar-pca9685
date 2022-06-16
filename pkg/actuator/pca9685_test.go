@@ -48,7 +48,7 @@ func Test_convertToDuty(t *testing.T) {
 				centerPWM: 1500,
 				freq:      60 * physic.Hertz,
 			},
-			want: "6%",
+			want: "12%",
 		},
 		{
 			name: "right",
@@ -59,7 +59,7 @@ func Test_convertToDuty(t *testing.T) {
 				centerPWM: 1500,
 				freq:      60 * physic.Hertz,
 			},
-			want: "12%",
+			want: "6%",
 		},
 	}
 	for _, tt := range tests {
@@ -71,6 +71,8 @@ func Test_convertToDuty(t *testing.T) {
 				maxPWM:     tt.args.rightPWM,
 				neutralPWM: tt.args.centerPWM,
 				freq:       tt.args.freq,
+				minPercent: 1.,
+				maxPercent: -1,
 			}
 
 			if got, err := c.convertToDuty(tt.args.percent); got.String() != tt.want {

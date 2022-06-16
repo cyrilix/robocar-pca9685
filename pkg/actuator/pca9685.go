@@ -49,9 +49,9 @@ func (c *Pca9685Controller) convertToDuty(percent float32) (gpio.Duty, error) {
 	// map absolute angle to angle that vehicle can implement.
 	pw := int(c.neutralPWM)
 	if percent > 0 {
-		pw = util.MapRange(float64(percent), 0, MaxPercent, float64(c.neutralPWM), float64(c.maxPWM))
+		pw = util.MapRange(float64(percent), 0, c.maxPercent, float64(c.neutralPWM), float64(c.maxPWM))
 	} else if percent < 0 {
-		pw = util.MapRange(float64(percent), MinPercent, 0, float64(c.minPWM), float64(c.neutralPWM))
+		pw = util.MapRange(float64(percent), c.minPercent, 0, float64(c.minPWM), float64(c.neutralPWM))
 	}
 	c.logr.Debugf("convert value %v to pw: %v", percent, pw)
 
@@ -59,20 +59,13 @@ func (c *Pca9685Controller) convertToDuty(percent float32) (gpio.Duty, error) {
 
 	draw := float64(pw) / float64(per)
 	return gpio.Duty(int32(draw * float64(gpio.DutyMax))), nil
-	/*
-		d, err := gpio.ParseDuty(strconv.Itoa(int(dd)))
-		// d, err := gpio.ParseDuty(fmt.Sprintf("%.f%%", draw*100))
-		if err != nil {
-			return 0, fmt.Errorf("unable to parse duty, probably bad compute: %w", err)
-		}
-		return d, nil
-	*/
 }
 
 type Pca9685Controller struct {
 	logr                       *zap.SugaredLogger
 	pin                        gpio.PinIO
 	minPWM, maxPWM, neutralPWM PWM
+	minPercent, maxPercent     float64
 	freq                       physic.Frequency
 }
 
@@ -103,7 +96,8 @@ func (c *Pca9685Controller) SetPercentValue(p float32) error {
 	return nil
 }
 
-func NewPca9685Controller(device *pca9685.Dev, channel int, minPWM, maxPWM, neutralPWM PWM, freq physic.Frequency, logr *zap.SugaredLogger) (*Pca9685Controller, error) {
+func NewPca9685Controller(device *pca9685.Dev, channel int, minPWM, maxPWM, neutralPWM PWM, minPercent, maxPercent float64,
+	freq physic.Frequency, logr *zap.SugaredLogger) (*Pca9685Controller, error) {
 	p, err := device.CreatePin(channel)
 	if err != nil {
 		return nil, fmt.Errorf("unable to create pin for channel %v: %w", channel, err)
@@ -113,6 +107,8 @@ func NewPca9685Controller(device *pca9685.Dev, channel int, minPWM, maxPWM, neut
 		minPWM:     minPWM,
 		maxPWM:     maxPWM,
 		neutralPWM: neutralPWM,
+		minPercent: minPercent,
+		maxPercent: maxPercent,
 		freq:       freq,
 		logr:       logr,
 	}
